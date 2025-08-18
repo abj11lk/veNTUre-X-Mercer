@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MERCER-TEAM 2
 
-## Getting Started
 
-First, run the development server:
+## Mercer Insurance Document Chatbot
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This is an internal tool we’re building for Mercer, an AI-powered chatbot that allows staff to ask questions about scanned insurance documents (PDFs), such as:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> “What is the effective date?”  
+> “Who is covered?”  
+> “What are the policy details?”
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The goal is to extract answers automatically from the uploaded documents using OCR (optical character recognition) and AI.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Project Objectives
 
-To learn more about Next.js, take a look at the following resources:
+Allow internal users to upload **scanned PDF insurance documents**  
+Automatically extract key fields (effective date, premium, coverage, etc.)  
+Let users **ask questions in natural language** and get relevant answers  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## start to end pipeline
+User Uploads PDF → OCR Extraction → Text Cleaning & Preprocessing (spaCy) → Text Chunking (LangChain, Haystack, or manual chunking)→ Embedding Creation for Document Chunks (OpenAI, HuggingFace Transformers, SentenceTransformers, etc.) → Store Embeddings in Vector Database (Weaviate) → User Asks a Question via Chat Interface (Tailwind alr done) → Embed User Question (using same embedding model as document chunks) → Similarity Search in Vector Database (find most relevant document chunks) → Pass Relevant Chunks + Question to LLM (Gemini) → LLM Synthesizes & Generates Answer → Answer Displayed in User Chat Interface
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Current Focus (MVP Phase)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. Extract Text from PDF
+- Use **OCR** to read scanned PDFs and pull out text
+  - Options to explore: `Tesseract` (open-source), `Google Vision API`, `AWS` and  `Azure`
+- Clean the text output for consistency
+- challenge is extracting usable text from images (via OCR) regardless of format variability
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Preprocess the Text
+- Use tools like `spaCy` to:
+  - Split the text into words/sentences
+  - Tag parts of speech
+  - Handle typos or weird formatting from OCR
+
+### User Interface
+- Create a simple web interface using `Tailwind CSS` 
+- Allow file upload + a chatbox to ask questions
+
+
+
+## What We Might Explore
+
+### Pre-trained Language Models (e.g. BERT, RoBERTa, DistilBERT)
+
+- We **only have 5 documents** now, so fine-tuning these models may not be effective yet
+- might explore **prompt-based use** 
+
+### Layout-Aware Models (e.g. LayoutLM)
+
+> read documents by understanding both the text **and layout/structure** (like tables, headers, etc.)
+
+- Might be more useful for scanned PDFs where layout matters
+- Good alternative if traditional text models don’t work well
+
+
+
+## Suggestions from the Team (Future Ideas)
+
+- Explore multiple models (e.g. BiLSTM, GRU, Transformers) and use **voting or confidence scoring** to increase accuracy
+- Use **Keras Tuner** or **Optuna** to automatically find the best model settings
+- Add **padding, pooling, and regularization** to prevent overfitting if we train deep models
+- Use `spaCy` more deeply for tokenization, tagging, and handling rare or misspelled words
+
+
